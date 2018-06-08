@@ -1,0 +1,21 @@
+{
+    "name": "hsoft/xmail",
+    "description": "test",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "haowei4032",
+            "email": "haowei4032@126.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Hsoft\\": "src/Hsoft/"
+        }
+    }
+}
