@@ -1,6 +1,7 @@
 {
     "name": "hsoft/xmail",
-    "description": "test",
+    "description": "A simple email tool library",
+    "keywords": ["smtp", "mail", "sendmail"],
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -13,9 +14,12 @@
     "require": {
         "php": ">=5.0.0"
     },
+    "require-dev": {
+        "php": ">=5.0.0"
+    },
     "autoload": {
         "psr-4": {
-            "Hsoft\\": "src/Hsoft/"
+            "Hsoft\\": "src/"
         }
     }
 }
