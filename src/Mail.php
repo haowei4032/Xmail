@@ -16,6 +16,13 @@ class Mail
 	private $host;
 	private $port;
 
+	private $from = 'boss@haowei.me';
+	private $to = '843390444@qq.com';
+	private $cc;
+	private $bcc;
+	private $subject;
+	private $body;
+
 
 	public function __construct(array $argv = null)
 	{
@@ -36,34 +43,36 @@ class Mail
 		if ($timeout) $this->timeout = $timeout;
 
 		$this->socket = fsockopen($this->scheme .'://'. $this->host, $this->port, $errno, $errstr, $this->timeout);
-		$this->writeLine('HELO ' . $this->host);
-		var_dump( $this->readLine() );
-		var_dump( $this->readLine() );
+		$this->readLine(220);
+		$this->writeLine('HELO '. $this->host, 250);
+		$this->writeLine('AUTH LOGIN', 334);
+		$this->writeLine(base64_encode('boss@haowei.me'), 334);
+		$this->writeLine(base64_encode('Blank2017'), 235);
+		$this->writeLine('MAIL FROM: '.$this->from, 250);
+		$this->writeLine('RCPT TO: '.$this->to, 250);
+		$this->writeLine('DATA', 354);
+		$this->writeLine('From: <'.$this->from.'>');
+		$this->writeLine('To: <'.$this->to.'>');
+		$this->writeLine('Date: '. gmdate(DATE_RFC1123));
+
+		var_dump($this->debugTrace);
 	}
 
-	public function authorized($user, $password)
+	private function readLine($code)
 	{
-		$this->writeLine('AUTH LOGIN');
-		$this->readLine();
-
-		$this->writeLine(base64_encode($user));
-		$this->readLine();
-
-		$this->writeLine(base64_encode($password));
-		$this->readLine();
+		$line = trim(fgets($this->socket));
+		$this->debugTrace[] = $line;
+		if (($resCode = substr($line, 0, 3)) != $code) {
+			return $resCode;
+		}
 	}
 
-	private function readLine()
-	{
-		$text = trim(fgets($this->socket));
-		$this->debugTrace[] = $text;
-		return $text;
-	}
-
-	private function writeLine($text)
+	private function writeLine($text, $code = 0)
 	{
 		$this->raw[] = $text;
-		return fputs($this->socket, $text . PHP_EOL);
+		$length = fputs($this->socket, $text . PHP_EOL);
+		if ($code > 0) $this->readLine($code);
+		return $length;
 	}
 }
 
