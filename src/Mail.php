@@ -36,7 +36,7 @@ class Mail
 		if ($timeout) $this->timeout = $timeout;
 
 		$this->socket = fsockopen($this->scheme .'://'. $this->host, $this->port, $errno, $errstr, $this->timeout);
-		$this->writeLine('HELO ' . $this->host, );
+		$this->writeLine('HELO ' . $this->host);
 		var_dump( $this->readLine() );
 		var_dump( $this->readLine() );
 	}
@@ -44,13 +44,13 @@ class Mail
 	public function authorized($user, $password)
 	{
 		$this->writeLine('AUTH LOGIN');
-		var_dump( $this->readLine() );
+		$this->readLine();
 
 		$this->writeLine(base64_encode($user));
-		var_dump( $this->readLine() );
+		$this->readLine();
 
 		$this->writeLine(base64_encode($password));
-		var_dump( $this->readLine() );
+		$this->readLine();
 	}
 
 	private function readLine()
