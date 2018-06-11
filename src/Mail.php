@@ -4,39 +4,66 @@ namespace Hsoft;
 
 class Mail
 {
-	private $insecure = false;
-	private $scheme = 'ssl';
+
+	private $raw = [];
+	private $debugTrace = [];
+	private $socket;
+	private $timeout = 5;
+	private $scheme = 'tcp';
+
+	private $charset = 'UTF-8';
+
 	private $host;
 	private $port;
-	private $timeout = 5;
-	private $fp;
 
-	private $from;
-	private $to;
-	private $cc;
-	private $bcc;
-	private $attachment;
 
-	public function __construct()
+	public function __construct(array $argv = null)
 	{
+		if ($argv) {
+			foreach ($argv as $property => $value) {
+				if (property_exists($this, $property)) {
+					$this->$property = $value;
+				}
+			}
+		}
 	}
 
-	public function setFrom()
+	public function connectServer($host = null, $port = null, $scheme = null, $timeout = null)
 	{
+		if ($host) $this->host = $host;
+		if ($port) $this->port = $port;
+		if ($scheme) $this->scheme = $scheme;
+		if ($timeout) $this->timeout = $timeout;
+
+		$this->socket = fsockopen($this->scheme .'://'. $this->host, $this->port, $errno, $errstr, $this->timeout);
+		$this->writeLine('HELO ' . $this->host, );
+		var_dump( $this->readLine() );
+		var_dump( $this->readLine() );
 	}
 
-	public function addTo()
-	{}
+	public function authorized($user, $password)
+	{
+		$this->writeLine('AUTH LOGIN');
+		var_dump( $this->readLine() );
 
-	public function addCc()
-	{}
+		$this->writeLine(base64_encode($user));
+		var_dump( $this->readLine() );
 
-	public function addBcc()
-	{}
+		$this->writeLine(base64_encode($password));
+		var_dump( $this->readLine() );
+	}
 
-	public function addBody()
-	{}
+	private function readLine()
+	{
+		$text = trim(fgets($this->socket));
+		$this->debugTrace[] = $text;
+		return $text;
+	}
 
-	public function send()
-	{}
+	private function writeLine($text)
+	{
+		$this->raw[] = $text;
+		return fputs($this->socket, $text . PHP_EOL);
+	}
 }
+

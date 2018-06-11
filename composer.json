@@ -1,5 +1,5 @@
 {
-    "name": "hsoft/xmail",
+    "name": "hsoft/mail",
     "description": "A simple email tool library",
     "keywords": ["smtp", "mail", "sendmail"],
     "type": "library",
