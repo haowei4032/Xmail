@@ -5,74 +5,159 @@ namespace Hsoft;
 class Mail
 {
 
-	private $raw = [];
-	private $debugTrace = [];
-	private $socket;
-	private $timeout = 5;
-	private $scheme = 'tcp';
+    private $raw = [];
+    private $debugTrace = [];
+    private $socket;
+    private $timeout = 5;
+    private $scheme = 'tcp';
 
-	private $charset = 'UTF-8';
+    private $separator;
+    private $charset = 'UTF-8';
 
-	private $host;
-	private $port;
+    private $host;
+    private $port;
 
-	private $from = 'boss@haowei.me';
-	private $to = '843390444@qq.com';
-	private $cc;
-	private $bcc;
-	private $subject;
-	private $body;
+    private $from;
+    private $to = [];
+    private $cc = [];
+    private $bcc = [];
+    private $subject = '';
+    private $body = '';
 
 
-	public function __construct(array $argv = null)
-	{
-		if ($argv) {
-			foreach ($argv as $property => $value) {
-				if (property_exists($this, $property)) {
-					$this->$property = $value;
-				}
-			}
-		}
-	}
+    public function __construct(array $argv = null)
+    {
+        if ($argv) {
+            foreach ($argv as $property => $value) {
+                if (property_exists($this, $property)) {
+                    $this->$property = $value;
+                }
+            }
+        }
+    }
 
-	public function connectServer($host = null, $port = null, $scheme = null, $timeout = null)
-	{
-		if ($host) $this->host = $host;
-		if ($port) $this->port = $port;
-		if ($scheme) $this->scheme = $scheme;
-		if ($timeout) $this->timeout = $timeout;
+    public function connectServer($host = null, $port = null, $scheme = null, $timeout = null)
+    {
+        if ($host) $this->host = $host;
+        if ($port) $this->port = $port;
+        if ($scheme) $this->scheme = $scheme;
+        if ($timeout) $this->timeout = $timeout;
 
-		$this->socket = fsockopen($this->scheme .'://'. $this->host, $this->port, $errno, $errstr, $this->timeout);
-		$this->readLine(220);
-		$this->writeLine('HELO '. $this->host, 250);
-		$this->writeLine('AUTH LOGIN', 334);
-		$this->writeLine(base64_encode('boss@haowei.me'), 334);
-		$this->writeLine(base64_encode('Blank2017'), 235);
-		$this->writeLine('MAIL FROM: '.$this->from, 250);
-		$this->writeLine('RCPT TO: '.$this->to, 250);
-		$this->writeLine('DATA', 354);
-		$this->writeLine('From: <'.$this->from.'>');
-		$this->writeLine('To: <'.$this->to.'>');
-		$this->writeLine('Date: '. gmdate(DATE_RFC1123));
+        $this->separator = '----=_' . md5($this->from . time()) . uniqid() . '_=----';
+        $this->socket = fsockopen($this->scheme . '://' . $this->host, $this->port, $errno, $errstr, $this->timeout);
+        $this->readLine(220);
+        $this->writeLine('HELO ' . $this->host, 250);
+        return $this;
+    }
 
-		var_dump($this->debugTrace);
-	}
+    public function authentication($user, $password)
+    {
+        $this->setFrom($user);
+        $this->writeLine('AUTH LOGIN', 334);
+        $this->writeLine(base64_encode($this->from), 334);
+        $this->writeLine(base64_encode($password), 235);
+        return $this;
+    }
 
-	private function readLine($code)
-	{
-		$line = trim(fgets($this->socket));
-		$this->debugTrace[] = $line;
-		if (($resCode = substr($line, 0, 3)) != $code) {
-			return $resCode;
-		}
-	}
+    public function auth()
+    {
+        return call_user_func_array([$this, 'authentication'], func_get_args());
+    }
 
-	private function writeLine($text, $code = 0)
-	{
-		$this->raw[] = $text;
-		$length = fputs($this->socket, $text . PHP_EOL);
-		if ($code > 0) $this->readLine($code);
-		return $length;
-	}
+    public function setFrom($from)
+    {
+        $this->from = $from;
+        return $this;
+    }
+
+    public function addTo($to)
+    {
+        $this->to[] = $to;
+        return $this;
+    }
+
+    public function addCc($cc)
+    {
+        $this->cc[] = $cc;
+        return $this;
+    }
+
+    public function addBcc($bcc)
+    {
+        $this->bcc[] = $bcc;
+        return $this;
+    }
+
+    public function addAttachment($name, $body)
+    {
+        return $this;
+    }
+
+    public function subject($subject)
+    {
+        $this->subject = $subject;
+        return $this;
+    }
+
+    public function body($body)
+    {
+        $this->body = $body;
+        return $this;
+    }
+
+    public function send()
+    {
+        $to = [];
+        foreach ($this->to as $next) $to[] = '<'.$next.'>';
+        $to = implode(',', $to);
+
+        $cc = [];
+        foreach ($this->cc as $next) $cc[] = '<'.$next.'>';
+        $cc = implode(',', $cc);
+
+        $bcc = [];
+        foreach ($this->bcc as $next) $bcc[] = '<'.$next.'>';
+        $bcc = implode(',', $bcc);
+
+        $this->writeLine('MAIL FROM: <' . $this->from . '>', 250);
+        $this->writeLine('RCPT TO: '. $to, 250);
+        $this->writeLine('DATA', 354);
+        $this->writeLine('From: <' . $this->from . '>');
+        $this->writeLine('To: '. $to);
+        if ($cc) $this->writeLine('Cc: '. $cc);
+        if ($bcc) $this->writeLine('Bcc: '. $bcc);
+        $this->writeLine('Date: ' . gmdate(DATE_RFC1123));
+        $this->writeLine('Subject: =?' . $this->charset . '?B?' . base64_encode($this->subject) . '?=');
+        $this->writeLine('Content-Type: multipart/mixed;');
+        $this->writeLine("\t" . 'boundary="' . $this->separator . '"');
+        $this->writeLine('MIME-Version: 1.0');
+        $this->writeLine('');
+        $this->writeLine('--' . $this->separator);
+        $this->writeLine('Content-Type: text/html;charset=' . $this->charset);
+        $this->writeLine('Content-Transfer-Encoding: base64');
+        $this->writeLine('');
+        $this->writeLine(base64_encode($this->body));
+        $this->writeLine('--' . $this->separator);
+        $this->writeLine('.', 250);
+        $this->writeLine('QUIT', 221);
+        return true;
+    }
+
+    private function readLine($code)
+    {
+        $line = trim(fgets($this->socket));
+        $this->debugTrace[] = $line;
+        if (($resCode = substr($line, 0, 3)) != $code) {
+            return $resCode;
+        }
+    }
+
+    private function writeLine($text, $code = 0)
+    {
+        $this->raw[] = $text;
+        $length = fputs($this->socket, $text . PHP_EOL);
+        if ($code > 0) $this->readLine($code);
+        return $length;
+    }
 }
 
