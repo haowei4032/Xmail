@@ -107,26 +107,26 @@ class Mail
 
     public function send()
     {
-        $to = [];
-        foreach ($this->to as $next) $to[] = '<'.$next.'>';
-        $to = implode(',', $to);
+        $to = implode(',', array_map(function ($value) {
+            return '<' . $value . '>';
+        }, $this->to));
 
-        $cc = [];
-        foreach ($this->cc as $next) $cc[] = '<'.$next.'>';
-        $cc = implode(',', $cc);
+        $cc = implode(',', array_map(function ($value) {
+            return '<' . $value . '>';
+        }, $this->cc));
 
-        $bcc = [];
-        foreach ($this->bcc as $next) $bcc[] = '<'.$next.'>';
-        $bcc = implode(',', $bcc);
+        $bcc = implode(',', array_map(function ($value) {
+            return '<' . $value . '>';
+        }, $this->bcc));
 
         $this->writeLine('MAIL FROM: <' . $this->from . '>', 250);
-        $this->writeLine('RCPT TO: '. $to, 250);
+        $this->writeLine('RCPT TO: ' . $to, 250);
         $this->writeLine('DATA', 354);
         $this->writeLine('From: <' . $this->from . '>');
-        $this->writeLine('To: '. $to);
-        if ($cc) $this->writeLine('Cc: '. $cc);
-        if ($bcc) $this->writeLine('Bcc: '. $bcc);
-        $this->writeLine('Date: ' . gmdate(DATE_RFC1123));
+        $this->writeLine('To: ' . $to);
+        if ($cc) $this->writeLine('Cc: ' . $cc);
+        if ($bcc) $this->writeLine('Bcc: ' . $bcc);
+        $this->writeLine('Date: ' . gmdate(DATE_RFC1123 ));
         $this->writeLine('Subject: =?' . $this->charset . '?B?' . base64_encode($this->subject) . '?=');
         $this->writeLine('Content-Type: multipart/mixed;');
         $this->writeLine("\t" . 'boundary="' . $this->separator . '"');
@@ -138,8 +138,9 @@ class Mail
         $this->writeLine('');
         $this->writeLine(base64_encode($this->body));
         $this->writeLine('--' . $this->separator);
-        $this->writeLine('.', 250);
+        $this->writeLine(PHP_EOL . '.', 250);
         $this->writeLine('QUIT', 221);
+        echo implode(PHP_EOL, $this->raw);
         return true;
     }
 
