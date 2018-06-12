@@ -43,7 +43,6 @@ class Mail
         if ($scheme) $this->scheme = $scheme;
         if ($timeout) $this->timeout = $timeout;
 
-        $this->separator = '----=_' . md5($this->from . time()) . uniqid() . '_=----';
         $this->socket = fsockopen($this->scheme . '://' . $this->host, $this->port, $errno, $errstr, $this->timeout);
         $this->readLine(220);
         $this->writeLine('HELO ' . $this->host, 250);
@@ -52,6 +51,7 @@ class Mail
 
     public function authentication($user, $password)
     {
+        $this->separator = '----=_Part_' . md5($user . time()) . uniqid();
         $this->setFrom($user);
         $this->writeLine('AUTH LOGIN', 334);
         $this->writeLine(base64_encode($this->from), 334);
