@@ -1,13 +1,13 @@
 {
-    "name": "hsoft/mail",
+    "name": "eastwood/mail",
     "description": "A simple email tool library",
     "keywords": ["smtp", "mail", "sendmail"],
     "type": "library",
     "license": "MIT",
     "authors": [
         {
-            "name": "haowei4032",
-            "email": "haowei4032@126.com"
+            "name": "eastwood",
+            "email": "boss@haowei.me"
         }
     ],
     "minimum-stability": "dev",
@@ -19,7 +19,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Hsoft\\": "src/"
+            "EastWood\\": "src/"
         }
     }
 }
