@@ -1,3 +1,3 @@
-# hsoft/mail
+# eastwood/mail
 
-composer require hsoft/mail
+composer require eastwood/mail
