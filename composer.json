@@ -10,7 +10,7 @@
             "email": "boss@haowei.me"
         }
     ],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "require": {
         "php": ">=5.0.0"
     },
