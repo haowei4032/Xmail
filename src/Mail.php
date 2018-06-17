@@ -134,14 +134,14 @@ class Mail
     /**
      * Connect SMTP server
      *
-     * @param string|null $host
-     * @param int|null $port
-     * @param string|null $scheme
-     * @param int|null $timeout
-     * @return $this
+     * @param string $host
+     * @param int $port
+     * @param string $scheme
+     * @param int $timeout
+     * @return \EastWood\Mail
      * @throws \ErrorException
      */
-    public function connectServer($host = null, $port = null, $scheme = null, $timeout = null)
+    public function connectServer($host = null, $port = 0, $scheme = null, $timeout = 0)
     {
         if ($host) $this->host = $host;
         if ($port) $this->port = $port;
@@ -159,7 +159,7 @@ class Mail
      *
      * @param string $user
      * @param string $password
-     * @return $this
+     * @return \EastWood\Mail
      * @throws \ErrorException
      */
     public function authentication($user, $password)
@@ -177,7 +177,7 @@ class Mail
      *
      * @param string $user
      * @param string $password
-     * @return $this
+     * @return \EastWood\Mail
      * @throws \ErrorException
      */
     public function auth()
@@ -189,7 +189,7 @@ class Mail
      * setting mail body character
      *
      * @param string $charset
-     * @return $this
+     * @return \EastWood\Mail
      */
     public function setCharset($charset)
     {
@@ -201,7 +201,7 @@ class Mail
      * Set sender address
      *
      * @param string $from
-     * @return $this
+     * @return \EastWood\Mail
      */
     public function setFrom($from)
     {
@@ -213,7 +213,7 @@ class Mail
      * Add to
      *
      * @param string $to
-     * @return $this
+     * @return \EastWood\Mail
      */
     public function addTo($to)
     {
@@ -225,7 +225,7 @@ class Mail
      * Add cc
      *
      * @param string $cc
-     * @return $this
+     * @return \EastWood\Mail
      */
     public function addCc($cc)
     {
@@ -237,7 +237,7 @@ class Mail
      * Add bcc
      *
      * @param string $bcc
-     * @return $this
+     * @return \EastWood\Mail
      */
     public function addBcc($bcc)
     {
@@ -250,7 +250,7 @@ class Mail
      *
      * @param string $name
      * @param mixed $body
-     * @return $this
+     * @return \EastWood\Mail
      */
     public function addAttachment($name, $body)
     {
@@ -261,7 +261,7 @@ class Mail
      * Set mail subject
      *
      * @param string $subject
-     * @return $this
+     * @return \EastWood\Mail
      */
     public function subject($subject)
     {
@@ -273,7 +273,7 @@ class Mail
      * Set mail body
      *
      * @param string $body
-     * @return $this
+     * @return \EastWood\Mail
      */
     public function body($body)
     {
