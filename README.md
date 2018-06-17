@@ -18,7 +18,16 @@ try {
         'scheme' => 'ssl',
         'charset' => 'utf-8'
     ]);
-    $mail->connectServer()
+    
+    /**
+     * In the constructor, you can pass in the following parameters
+     * 
+     * string $host [optional]
+     * int $port [optional]
+     * string $scheme [optional]
+     * int $timeout [optional]
+     */
+    $mail->connectServer($host, $port, $scheme, $timeout)
         ->auth('boss@haowei.me', 'xxxxxx')
         ->addTo('xxx@xxx.com')
         ->addTo('xxx1@xxx.com')
