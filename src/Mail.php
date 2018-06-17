@@ -85,6 +85,12 @@ class Mail
     private $from;
 
     /**
+     * reply address
+     * @var string
+     */
+    private $reply;
+
+    /**
      * body recipients list
      * @var array
      */
@@ -193,8 +199,8 @@ class Mail
      */
     public function setCharset($charset)
     {
-       $this->charset = strtoupper($charset);
-       return $this;
+        $this->charset = strtoupper($charset);
+        return $this;
     }
 
     /**
@@ -206,6 +212,18 @@ class Mail
     public function setFrom($from)
     {
         $this->from = $from;
+        return $this;
+    }
+
+    /**
+     * Set reply address
+     *
+     * @param string $reply
+     * @return $this
+     */
+    public function setReply($reply)
+    {
+        $this->reply = $reply;
         return $this;
     }
 
@@ -310,9 +328,11 @@ class Mail
         $this->writeLine('DATA', 354);
         $this->writeLine('From: <' . $this->from . '>');
         $this->writeLine('To: ' . $to);
+        if ($this->reply) $this->writeLine('Reply-To: '. $this->reply);
         if ($cc) $this->writeLine('Cc: ' . $cc);
         if ($bcc) $this->writeLine('Bcc: ' . $bcc);
-        $this->writeLine('Date: ' . gmdate(DATE_RFC1123));
+        $this->writeLine('Date: ' . date('r'));
+        $this->writeLine('X-Mailer: ' . __CLASS__ . ' v' . Mail::VERSION);
         $this->writeLine('Subject: =?' . $this->charset . '?B?' . base64_encode($this->subject) . '?=');
         $this->writeLine('Content-Type: multipart/mixed;');
         $this->writeLine("\t" . 'boundary="' . $this->separator . '"');
