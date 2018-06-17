@@ -175,11 +175,26 @@ class Mail
     /**
      * Authentication method aliases
      *
-     * @return mixed
+     * @param $user
+     * @param $password
+     * @return $this
+     * @throws \ErrorException
      */
     public function auth()
     {
         return call_user_func_array([$this, 'authentication'], func_get_args());
+    }
+
+    /**
+     * setting mail body character
+     *
+     * @param string $charset
+     * @return $this
+     */
+    public function setCharset($charset)
+    {
+       $this->charset = strtoupper($charset);
+       return $this;
     }
 
     /**
