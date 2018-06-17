@@ -307,30 +307,17 @@ class Mail
      */
     public function send()
     {
-        $to = implode(',', array_map(function ($value) {
-            return '<' . $value . '>';
-        }, $this->to));
-
-        $cc = implode(',', array_map(function ($value) {
-            return '<' . $value . '>';
-        }, $this->cc));
-
-        $bcc = implode(',', array_map(function ($value) {
-            return '<' . $value . '>';
-        }, $this->bcc));
-
         $this->rcpt = array_merge($this->to, $this->cc, $this->bcc);
-
         $this->writeLine('MAIL FROM: <' . $this->from . '>', 250);
         foreach ($this->rcpt as $rcpt)
             $this->writeLine('RCPT TO: <' . $rcpt . '>', 250);
 
         $this->writeLine('DATA', 354);
-        $this->writeLine('From: <' . $this->from . '>');
-        $this->writeLine('To: ' . $to);
-        if ($this->reply) $this->writeLine('Reply-To: '. $this->reply);
-        if ($cc) $this->writeLine('Cc: ' . $cc);
-        if ($bcc) $this->writeLine('Bcc: ' . $bcc);
+        $this->writeLine('From: ' . $this->from);
+        $this->writeLine('To: ' . implode(',', $this->to));
+        if ($this->reply) $this->writeLine('Reply-To: ' . $this->reply);
+        if ($this->cc) $this->writeLine('Cc: ' . implode(',', $this->cc));
+        if ($this->bcc) $this->writeLine('Bcc: ' . implode(',', $this->bcc));
         $this->writeLine('Date: ' . date('r'));
         $this->writeLine('X-Mailer: ' . __CLASS__ . ' v' . Mail::VERSION);
         $this->writeLine('Subject: =?' . $this->charset . '?B?' . base64_encode($this->subject) . '?=');
@@ -343,6 +330,7 @@ class Mail
         $this->writeLine('Content-Transfer-Encoding: base64');
         $this->writeLine('');
         $this->writeLine(base64_encode($this->body));
+        $this->writeLine('');
         $this->writeLine('--' . $this->separator);
         $this->writeLine(PHP_EOL . '.', 250);
         $this->writeLine('QUIT', 221);
