@@ -19,6 +19,11 @@ class Mail
     const VERSION = '1.0.0';
 
     /**
+     * SMTP protocol newline
+     */
+    const CRLF = "\r\n";
+
+    /**
      * meta data
      * @var array
      */
@@ -406,7 +411,7 @@ class Mail
     private function writeLine($text, $code = 0)
     {
         $this->raw[] = $text;
-        $length = fputs($this->socket, $text . PHP_EOL);
+        $length = fputs($this->socket, $text . self::CRLF);
         if ($code > 0) $this->readLine($code);
         return $length;
     }
