@@ -134,10 +134,10 @@ class Mail
     /**
      * Connect SMTP server
      *
-     * @param null $host
-     * @param null $port
-     * @param null $scheme
-     * @param null $timeout
+     * @param string|null $host
+     * @param int|null $port
+     * @param string|null $scheme
+     * @param int|null $timeout
      * @return $this
      * @throws \ErrorException
      */
@@ -157,8 +157,8 @@ class Mail
     /**
      * Authentication identity
      *
-     * @param $user
-     * @param $password
+     * @param string $user
+     * @param string $password
      * @return $this
      * @throws \ErrorException
      */
@@ -175,8 +175,8 @@ class Mail
     /**
      * Authentication method aliases
      *
-     * @param $user
-     * @param $password
+     * @param string $user
+     * @param string $password
      * @return $this
      * @throws \ErrorException
      */
@@ -200,7 +200,7 @@ class Mail
     /**
      * Set sender address
      *
-     * @param $from
+     * @param string $from
      * @return $this
      */
     public function setFrom($from)
@@ -212,7 +212,7 @@ class Mail
     /**
      * Add to
      *
-     * @param $to
+     * @param string $to
      * @return $this
      */
     public function addTo($to)
@@ -224,7 +224,7 @@ class Mail
     /**
      * Add cc
      *
-     * @param $cc
+     * @param string $cc
      * @return $this
      */
     public function addCc($cc)
@@ -236,7 +236,7 @@ class Mail
     /**
      * Add bcc
      *
-     * @param $bcc
+     * @param string $bcc
      * @return $this
      */
     public function addBcc($bcc)
@@ -260,7 +260,7 @@ class Mail
     /**
      * Set mail subject
      *
-     * @param $subject
+     * @param string $subject
      * @return $this
      */
     public function subject($subject)
@@ -272,7 +272,7 @@ class Mail
     /**
      * Set mail body
      *
-     * @param $body
+     * @param string $body
      * @return $this
      */
     public function body($body)
@@ -331,7 +331,7 @@ class Mail
 
     /**
      * Get expected code
-     * @param $code
+     * @param int $code
      * @throws \ErrorException
      */
     private function readLine($code)
@@ -350,7 +350,7 @@ class Mail
     /**
      * Write IO stream
      *
-     * @param $text
+     * @param string $text
      * @param int $code
      * @return bool|int
      * @throws \ErrorException
