@@ -1,4 +1,4 @@
-# eastwood/mail
+# EastWood/Mail
 
 composer require eastwood/mail
 
