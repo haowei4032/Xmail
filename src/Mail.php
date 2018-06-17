@@ -120,6 +120,12 @@ class Mail
      */
     private $body = '';
 
+    /**
+     * attachment list
+     * @var array
+     */
+    private $attachment = [];
+
 
     /**
      * Mail constructor
@@ -265,13 +271,37 @@ class Mail
 
     /**
      * Add an attachment
+     * Please use file stream for large files
      *
-     * @param string $name
-     * @param mixed $body
+     * @param string $path
+     * @param resource $stream [optional]
+     * @throws \ErrorException
      * @return \EastWood\Mail
      */
-    public function addAttachment($name, $body)
+    public function addAttachment($path, $stream = null)
     {
+        if (is_resource($stream)) {
+            $binary = '';
+            fseek($stream, SEEK_SET);
+            while (!feof($stream)) $binary .= fgets($stream);
+            fclose($stream);
+            $this->attachment[] = [
+                'name' => $path,
+                'body' => base64_encode($binary)
+            ];
+        } else {
+            if (!is_file($path)) {
+                $message = json_encode([
+                    'error' => 'IOException',
+                    'message' => sprintf('%s file not found')
+                ]);
+                throw new \ErrorException($message);
+            }
+            $this->attachment[] = [
+                'name' => basename($path),
+                'body' => base64_encode(file_get_contents($path))
+            ];
+        }
         return $this;
     }
 
@@ -330,9 +360,19 @@ class Mail
         $this->writeLine('Content-Transfer-Encoding: base64');
         $this->writeLine('');
         $this->writeLine(base64_encode($this->body));
-        $this->writeLine('');
         $this->writeLine('--' . $this->separator);
-        $this->writeLine(PHP_EOL . '.', 250);
+        if ($this->attachment) {
+            foreach ($this->attachment as $part) {
+                $this->writeLine('Content-Type: application/octet-stream; name="' . $part['name'] . '"');
+                $this->writeLine('Content-Transfer-Encoding: base64');
+                $this->writeLine('Content-Disposition: attachment; filename="' . $part['name'] . '"');
+                $this->writeLine('');
+                $this->writeLine($part['body']);
+                $this->writeLine('--' . $this->separator);
+            }
+        }
+        $this->writeLine('');
+        $this->writeLine('.', 250);
         $this->writeLine('QUIT', 221);
         return true;
     }
@@ -348,8 +388,8 @@ class Mail
         $this->debugTrace[] = $line;
         if (($retCode = substr($line, 0, 3)) != $code) {
             $message = json_encode([
-                'code' => $retCode,
-                'message' => $line
+                'error' => 'InvalidException',
+                'message' => sprintf('expected code is %s, but gets %s', $code, $retCode)
             ]);
             throw new \ErrorException($message);
         }
