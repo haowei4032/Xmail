@@ -165,7 +165,12 @@ class Mail
         if ($scheme) $this->scheme = $scheme;
         if ($timeout) $this->timeout = $timeout;
 
-        $this->socket = fsockopen($this->scheme . '://' . $this->host, $this->port, $errno, $errstr, $this->timeout);
+        // Only catch SMTP server connection exception
+        set_error_handler(function ($code, $message, $file, $line) {
+            throw new \ErrorException($message, $code, 1, $file, $line);
+        });
+        $this->socket = fsockopen($this->scheme . '://' . $this->host, $this->port, $code, $message, $this->timeout);
+        restore_error_handler();
         $this->readLine(220);
         $this->writeLine('HELO ' . $this->host, 250);
         return $this;
