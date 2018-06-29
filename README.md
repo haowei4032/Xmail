@@ -1,46 +1,60 @@
 # EastWood/Mail
 
+Mail Version 1.0.0 is deprecated, please use MailClient 2.0.0 instead
+
+[![Latest Stable Version](https://poser.pugx.org/eastwood/mail/v/stable)](https://packagist.org/packages/eastwood/mail)
+[![Total Downloads](https://poser.pugx.org/eastwood/mail/downloads)](https://packagist.org/packages/eastwood/mail)
+![php>=5.4](https://img.shields.io/badge/php-%3E%3D5.4-orange.svg?maxAge=2592000)
+[![License](https://poser.pugx.org/eastwood/mail/license)](https://packagist.org/packages/eastwood/mail)
+
+
+
+Installation
+------------
+- The minimum PHP 5.4 version required
+- It works best with PHP 7
+
+```
 composer require eastwood/mail
+```
+
+
+
+Example
+------------
 
 ```php
 <?php
-// Import EastWood\Mail classes into the global namespace
-// These must be at the top of your script, not inside a function
-use EastWood\Mail;
 
 //Load Composer's autoloader
 require 'vendor/autoload.php';
 
-try {
-    $mail = new Mail([
-        'host' => 'smtp.exmail.qq.com',
-        'port' => 465,
-        'scheme' => 'ssl',
-        'charset' => 'utf-8'
-    ]);
-    
-    /**
-     * In the constructor, you can pass in the following parameters
-     * 
-     * string $host [optional]
-     * int $port [optional]
-     * string $scheme [optional]
-     * int $timeout [optional]
-     */
-    
-    $stream = fopen('file:////tmp/example.zip', 'rb');
-    $mail->connectServer($host = 'localhost', $port = 25, $scheme = 'tcp', $timeout = 5)
-        ->auth('boss@haowei.me', 'password')
-        ->addTo('xxx1@xxx.com')
-        ->addTo('xxx2@xxx.com')
-        ->addCc('xxx3@xxx.com')
-        ->addAttachment('file:////tmp/1.txt') // support protocol ( file:/// , http:// )
-        ->addAttachment('123.zip', $stream) // large file, please use file stream
-        ->subject('这是写标题')
-        ->body('这里可以写<div style="color: red; font-weight: bold;">HTML</div>')
-        ->send();
-    if (is_resource($stream)) fclose($stream);
-} catch (\Exception $e) {
-    var_dump($e->getMessage());
-}
+use EastWood\MailClient;
+
+// case 1
+$dsn = 'smtp.qq.com'; 
+
+// case 2
+$dsn = 'tcp://smtp.qq.com:25';
+
+// case 3
+$dsn = 'ssl://smtp.qq.com';
+
+// case 4
+$dsn = 'ssl://smtp.qq.com:465';
+
+$mail = new MailClient($dsn = 'ssl://smtp.qq.com', $user = '123456@qq.com', $password = '843390444', $timeout = 5);
+$mail->to('654321@qq.com'); 
+$mail->cc('test1@qq.com');
+$mail->bcc('test2@qq.com');
+$mail->reply('root@localhost');
+$mail->attachment('file:////tmp/1.txt');
+$mail->attachment('test.tar.gz', fopen('file:////tmp/test.tar.gz', 'rb'));
+$mail->subject('test');
+$mail->body('this is test <b>HTML</b>');
+$mail->send(); // return bool
+
+var_dump($mail->getDebugTrace());
+
+
 ```

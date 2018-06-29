@@ -147,15 +147,16 @@ class MailClient
      * @param string $dsn
      * @param string $user
      * @param string $password
-     * @param int $timeout
+     * @param int $timeout [optional]
      * @return MailClient
      */
-    public function connectServer($dsn, $user, $password, $timeout)
+    public function connectServer($dsn, $user, $password, $timeout = 5)
     {
         $parse = parse_url($dsn);
-        $this->scheme = empty($parse['scheme']) ?: $parse['scheme'];
-        $this->host = empty($parse['host']) ?: $parse['host'];
-        $this->port = empty($parse['port']) ? ($this->scheme != 'ssl' ?: 465) : $parse['port'];
+        if (!isset($parse['host'])) $parse['host'] = empty($parse['path']) ? null : $parse['path'];
+        if (isset($parse['scheme'])) $this->scheme = $parse['scheme'];
+        if (isset($parse['host'])) $this->host = $parse['host'];
+        $this->port = isset($parse['port']) ? $parse['port'] : ($this->scheme == 'ssl' ? 465 : $this->port);
         $this->socket = @fsockopen($this->scheme . '://' . $this->host, $this->port, $errno, $errstr, $timeout);
         if ($this->socket) {
             $pass = $this->readLine(220) &&
@@ -300,16 +301,19 @@ class MailClient
     public function send()
     {
         if (!$this->activated) return $this->activated;
+
         $this->rcpt = array_merge($this->to, $this->cc, $this->bcc);
         $pass = $this->writeLine('MAIL FROM: <' . $this->from . '>', 250);
         if (!$pass) return false;
+
         foreach ($this->rcpt as $rcpt) {
-            $this->writeLine('RCPT TO: <' . $rcpt . '>', 250);
+            $pass = $this->writeLine('RCPT TO: <' . $rcpt . '>', 250);
             if (!$pass) return false;
         }
 
         $pass = $this->writeLine('DATA', 354);
         if (!$pass) return false;
+
         $this->writeLine('From: ' . $this->from);
         $this->writeLine('To: ' . implode(',', $this->to));
         if ($this->reply) $this->writeLine('Reply-To: ' . $this->reply);
@@ -328,6 +332,7 @@ class MailClient
         $this->writeLine('');
         $this->writeLine(base64_encode($this->body));
         $this->writeLine('--' . $this->separator);
+
         if ($this->attachment) {
             foreach ($this->attachment as $part) {
                 $this->writeLine('Content-Type: application/octet-stream; name="' . $part['name'] . '"');
@@ -338,9 +343,11 @@ class MailClient
                 $this->writeLine('--' . $this->separator);
             }
         }
+
         $this->writeLine('');
         $pass = $this->writeLine('.', 250) &&
             $this->writeLine('QUIT', 221);
+
         return $pass;
 
     }
